@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xerv-devtools — utilities for the terminal-minded</title>
+<meta name="description" content="A small, static toolbox of developer utilities: GitHub remote URL converter and a live color format converter.">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230e1013'/%3E%3Ctext x='50' y='68' font-size='58' font-family='monospace' font-weight='700' fill='%23ffb454' text-anchor='middle'%3E%3E_%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<a class="skip-link" href="#tools-hub">Tools</a>
+
+<header class="site-header" id="top">
+  <a href="https://x.com/Heartbreak_Juan" title="Pfp artist: Heartbreak_Juan" class="brand" aria-label="xerv-devtools home" target="_blank">
+    <span class="avatar" aria-hidden="true">
+      <img src="dess-pfp-doobie.jpg" alt="" class="avatar-img">
+    </span>
+    <span class="brand-text">xerv-tools<span class="cursor" aria-hidden="true"></span></span>
+  </a>
+
+  <div class="header-actions">
+    <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch color theme" aria-pressed="false">
+      <svg class="icon-sun" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.5"></circle>
+        <line x1="12" y1="1.5" x2="12" y2="4"></line>
+        <line x1="12" y1="20" x2="12" y2="22.5"></line>
+        <line x1="4.2" y1="4.2" x2="5.9" y2="5.9"></line>
+        <line x1="18.1" y1="18.1" x2="19.8" y2="19.8"></line>
+        <line x1="1.5" y1="12" x2="4" y2="12"></line>
+        <line x1="20" y1="12" x2="22.5" y2="12"></line>
+        <line x1="4.2" y1="19.8" x2="5.9" y2="18.1"></line>
+        <line x1="18.1" y1="5.9" x2="19.8" y2="4.2"></line>
+      </svg>
+      <svg class="icon-moon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11Z"></path>
+      </svg>
+    </button>
+
+    <a class="icon-btn" href="https://github.com/Ahtadevana" target="_blank" rel="noopener noreferrer" aria-label="ahtadevana on GitHub">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 .5C5.73.5.75 5.6.75 12c0 5.1 3.3 9.42 7.86 10.95.57.1.78-.25.78-.56 0-.27-.01-1.16-.02-2.11-3.2.7-3.87-1.37-3.87-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.74.8 1.18 1.83 1.18 3.08 0 4.41-2.7 5.38-5.27 5.67.42.36.78 1.06.78 2.15 0 1.55-.01 2.8-.01 3.18 0 .31.21.67.79.56A11.5 11.5 0 0 0 23.25 12C23.25 5.6 18.27.5 12 .5Z"/>
+      </svg>
+    </a>
+  </div>
+</header>
+
+<main id="main-content">
+
+  <!-- ============ HUB VIEW ============ -->
+  <section id="view-hub" class="view active" data-view="hub">
+    <div class="hero">
+      <p class="eyebrow">// zero-server utilities</p>
+      <h1>Just a tool site, built for my own convenience.</h1>
+      <p class="hero-sub">Built entirely by <strong>Claude</strong>. <br>All credits to <strong>Claude</strong>.</p>
+    </div>
+
+    <div class="tools-hub" id="tools-hub">
+      <h2 class="section-title">Tools</h2>
+      <div class="tools-grid">
+
+        <button class="tool-card" type="button" data-target="git-remote">
+          <span class="tool-card-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+          </span>
+          <span class="tool-card-title">Git SSH/HTTPS Converter</span>
+          <span class="tool-card-desc">Convert GitHub repo links between HTTPS and SSH, ready to copy.</span>
+          <span class="tool-card-cta">Open tool <span aria-hidden="true">&rarr;</span></span>
+        </button>
+
+        <button class="tool-card" type="button" data-target="color-lab">
+          <span class="tool-card-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="8" r="1.4" fill="currentColor" stroke="none"></circle><circle cx="8.5" cy="13" r="1.4" fill="currentColor" stroke="none"></circle><circle cx="15.5" cy="13" r="1.4" fill="currentColor" stroke="none"></circle><path d="M12 21a9 9 0 0 1 0-18c1 3 4 2 4 5a2 2 0 0 1-2 2h-.5a1.5 1.5 0 0 0 0 3H15a4 4 0 0 1 4 4c0 2.2-3.1 4-7 4Z"></path></svg>
+          </span>
+          <span class="tool-card-title">Color Format Converter</span>
+          <span class="tool-card-desc">HEX, RGB, HSL, HSV, CMYK and Bash escape codes, all kept in sync.</span>
+          <span class="tool-card-cta">Open tool <span aria-hidden="true">&rarr;</span></span>
+        </button>
+
+      </div>
+      <p class="more-tools">More tools soon.</p>
+    </div>
+  </section>
+
+  <!-- ============ GIT REMOTE TOOL VIEW ============ -->
+  <section id="view-git-remote" class="view tool-view" data-view="git-remote">
+    <button class="back-btn" type="button" data-back>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to tools
+    </button>
+
+    <article class="tool-card-full">
+      <div class="tool-titlebar">
+        <span class="dots" aria-hidden="true"><span class="dot dot--r"></span><span class="dot dot--y"></span><span class="dot dot--g"></span></span>
+        <span class="tool-path">~/tools/git-remote-converter</span>
+      </div>
+      <div class="tool-body">
+        <h2>Git Remote Converter</h2>
+        <p class="tool-desc">Paste a GitHub repo URL in any format, ready to drop into <code>git remote add</code>.</p>
+
+        <label class="field-label" for="git-input">Repository URL</label>
+        <input id="git-input" class="text-input" type="text" placeholder="https://github.com/user/repo  or  git@github.com:user/repo.git" autocomplete="off" spellcheck="false" inputmode="url">
+
+        <div class="output-row">
+          <button class="output-item" type="button" id="git-https-item" aria-label="Copy HTTPS remote URL">
+            <span class="output-top">
+              <span class="output-tag">HTTPS</span>
+              <span class="copy-affordance">
+                <svg class="ic-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <svg class="ic-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span class="copy-word"></span>
+              </span>
+            </span>
+            <code id="git-https">—</code>
+          </button>
+
+          <button class="output-item" type="button" id="git-ssh-item" aria-label="Copy SSH remote URL">
+            <span class="output-top">
+              <span class="output-tag">SSH</span>
+              <span class="copy-affordance">
+                <svg class="ic-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <svg class="ic-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span class="copy-word"></span>
+              </span>
+            </span>
+            <code id="git-ssh">—</code>
+          </button>
+        </div>
+
+        <p class="hint" id="git-hint">Paste a repo URL above to see both remotes.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ COLOR LAB TOOL VIEW ============ -->
+  <section id="view-color-lab" class="view tool-view" data-view="color-lab">
+    <button class="back-btn" type="button" data-back>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to tools
+    </button>
+
+    <article class="tool-card-full tool-card-full--wide">
+      <div class="tool-titlebar">
+        <span class="dots" aria-hidden="true"><span class="dot dot--r"></span><span class="dot dot--y"></span><span class="dot dot--g"></span></span>
+        <span class="tool-path">~/tools/color-convert</span>
+      </div>
+      <div class="tool-body">
+        <h2>Color Format Converter</h2>
+        <p class="tool-desc">Edit any format below. Other syncs based on your input.</p>
+
+        <div class="color-layout">
+          <div class="swatch-wrap">
+            <div id="color-swatch" class="swatch">
+              <span id="swatch-label">#FFB454</span>
+            </div>
+          </div>
+
+          <div class="color-fields" id="color-fields">
+
+            <div class="field-row">
+              <label for="hex-input">HEX</label>
+              <div class="input-copy">
+                <input id="hex-input" class="text-input mono" type="text" spellcheck="false" autocomplete="off">
+                <button class="copy-btn" data-copy-target="hex-input" type="button" aria-label="Copy HEX value">
+                  <svg class="ic-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="ic-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label for="rgb-input">RGB</label>
+              <div class="input-copy">
+                <input id="rgb-input" class="text-input mono" type="text" spellcheck="false" autocomplete="off">
+                <button class="copy-btn" data-copy-target="rgb-input" type="button" aria-label="Copy RGB value">
+                  <svg class="ic-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="ic-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label for="hsl-input">HSL</label>
+              <div class="input-copy">
+                <input id="hsl-input" class="text-input mono" type="text" spellcheck="false" autocomplete="off">
+                <button class="copy-btn" data-copy-target="hsl-input" type="button" aria-label="Copy HSL value">
+                  <svg class="ic-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="ic-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label for="hsv-input">HSV</label>
+              <div class="input-copy">
+                <input id="hsv-input" class="text-input mono" type="text" spellcheck="false" autocomplete="off">
+                <button class="copy-btn" data-copy-target="hsv-input" type="button" aria-label="Copy HSV value">
+                  <svg class="ic-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="ic-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label for="cmyk-input">CMYK</label>
+              <div class="input-copy">
+                <input id="cmyk-input" class="text-input mono" type="text" spellcheck="false" autocomplete="off">
+                <button class="copy-btn" data-copy-target="cmyk-input" type="button" aria-label="Copy CMYK value">
+                  <svg class="ic-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="ic-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label for="ansi-true-input">Bash (truecolor)</label>
+              <div class="input-copy">
+                <input id="ansi-true-input" class="text-input mono" type="text" spellcheck="false" autocomplete="off">
+                <button class="copy-btn" data-copy-target="ansi-true-input" type="button" aria-label="Copy truecolor escape code">
+                  <svg class="ic-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="ic-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label for="ansi-256-input">Bash (256-color)</label>
+              <div class="input-copy">
+                <input id="ansi-256-input" class="text-input mono" type="text" spellcheck="false" autocomplete="off" readonly>
+                <button class="copy-btn" data-copy-target="ansi-256-input" type="button" aria-label="Copy 256-color escape code">
+                  <svg class="ic-copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg class="ic-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <p class="hint" id="color-hint">Formats stay in sync automatically. Invalid values are ignored until they're valid again.</p>
+      </div>
+    </article>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Built by <strong>Claude</strong>. Do NOT credit me for this.</p>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
