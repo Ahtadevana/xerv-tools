@@ -660,6 +660,337 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px, 5vw, 56px) 24px
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ---------------------------------------------
+   Notes tool
+--------------------------------------------- */
+.notes-card { max-width: 920px; }
+
+.notes-body { padding: 22px 26px 26px; }
+
+.notes-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.notes-head .tool-desc { margin-bottom: 0; }
+
+/* ----- vim toggle switch ----- */
+.vim-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.vim-toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+
+.vim-toggle-track {
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
+}
+.vim-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: transform 0.22s cubic-bezier(.5,0,.2,1), background 0.2s ease;
+}
+.vim-toggle input:checked + .vim-toggle-track {
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.vim-toggle input:checked + .vim-toggle-track .vim-toggle-thumb {
+  transform: translateX(16px);
+  background: var(--accent);
+}
+.vim-toggle input:focus-visible + .vim-toggle-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.vim-toggle-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* ----- layout: sidebar + editor ----- */
+.notes-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  min-height: 420px;
+}
+@media (max-width: 640px) {
+  .notes-layout { grid-template-columns: 1fr; min-height: 0; }
+}
+
+.notes-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.notes-sidebar-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.notes-search {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 9px;
+  color: var(--text-faint);
+}
+.notes-search input {
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  min-width: 0;
+  width: 100%;
+}
+.notes-search input::placeholder { color: var(--text-faint); }
+
+.notes-new-btn { width: 34px; height: 34px; flex-shrink: 0; }
+
+.notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  max-height: 420px;
+}
+@media (max-width: 640px) { .notes-list { max-height: 220px; } }
+
+.note-item {
+  position: relative;
+  border-radius: var(--radius-sm);
+  margin-bottom: 3px;
+}
+.note-item:last-child { margin-bottom: 0; }
+.note-item.active { background: var(--surface-2); }
+
+.note-item-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  padding: 9px 30px 9px 10px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: background 0.15s ease;
+}
+.note-item:not(.active) .note-item-btn:hover { background: var(--surface-2); }
+
+.note-item-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.note-item.active .note-item-title { color: var(--accent); }
+
+.note-item-snippet {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-item-time {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  margin-top: 1px;
+}
+
+.note-item-del {
+  position: absolute;
+  top: 8px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--text-faint);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.note-item:hover .note-item-del,
+.note-item-del:focus-visible { opacity: 1; }
+.note-item-del:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, transparent); }
+.note-item-del.confirm {
+  opacity: 1;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+.notes-empty-hint {
+  padding: 16px 12px;
+  margin: 0;
+  text-align: center;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+/* ----- editor pane ----- */
+.notes-editor {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.notes-editor-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.note-title-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+.note-title-input::placeholder { color: var(--text-faint); font-weight: 600; }
+
+.notes-editor-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.notes-editor-actions .icon-btn { width: 32px; height: 32px; border-radius: var(--radius-sm); }
+.notes-editor-actions .icon-btn:hover#notes-delete-btn { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, var(--border)); }
+
+.note-editor-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+}
+
+.note-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 300px;
+  resize: none;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  padding: 14px;
+}
+.note-textarea::placeholder { color: var(--text-faint); }
+
+.note-vim-host { flex: 1; min-height: 300px; display: flex; }
+.note-vim-host[hidden], .note-textarea[hidden] { display: none; }
+.note-vim-host .CodeMirror {
+  flex: 1;
+  height: auto;
+  min-height: 300px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  padding: 14px 6px;
+}
+.note-vim-host .CodeMirror-cursor { border-left-color: var(--accent); }
+.note-vim-host .CodeMirror-selected { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+.note-vim-host .CodeMirror-gutters { display: none; }
+.note-vim-host .CodeMirror-fat-cursor .CodeMirror-cursor { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+.note-vim-host .cm-trailingspace { text-decoration: none; }
+
+.notes-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 14px;
+  border-top: 1px solid var(--border-soft);
+  background: var(--surface);
+}
+
+.notes-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-faint);
+}
+.notes-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  transition: background 0.2s ease;
+}
+.notes-status.saving .notes-status-dot { background: var(--accent); animation: pulseDot 0.9s ease-in-out infinite; }
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.notes-meta {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------
    Reduced motion
 --------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {

@@ -34,7 +34,7 @@
      driven entirely by the URL hash so back/forward works.
   ========================================================= */
   const views = document.querySelectorAll(".view");
-  const validRoutes = new Set(["git-remote", "color-lab"]);
+  const validRoutes = new Set(["git-remote", "color-lab", "notes"]);
 
   function routeFromHash() {
     const raw = location.hash.replace(/^#/, "");
@@ -440,4 +440,393 @@
       }
     });
   });
+
+  /* =========================================================
+     NOTES
+     Multi-note scratchpad. Everything lives in localStorage —
+     no network, no server, survives reloads and closing the tab.
+     Optional Vim keybindings are lazy-loaded from cdnjs only
+     when the user actually flips the switch on.
+  ========================================================= */
+  (function initNotes() {
+    const listEl = document.getElementById("notes-list");
+    if (!listEl) return; // notes markup not present on this page
+
+    const STORE_KEY = "xerv-notes-v1";
+    const ACTIVE_KEY = "xerv-notes-active-v1";
+    const VIM_KEY = "xerv-notes-vim-v1";
+
+    const searchInput = document.getElementById("notes-search");
+    const newBtn = document.getElementById("notes-new-btn");
+    const emptyHint = document.getElementById("notes-empty-hint");
+    const titleInput = document.getElementById("note-title");
+    const contentArea = document.getElementById("note-content");
+    const vimHost = document.getElementById("note-vim-host");
+    const deleteBtn = document.getElementById("notes-delete-btn");
+    const downloadBtn = document.getElementById("notes-download-btn");
+    const statusWrap = document.getElementById("notes-status");
+    const statusText = document.getElementById("notes-status-text");
+    const metaEl = document.getElementById("notes-meta");
+    const vimToggle = document.getElementById("vim-toggle-input");
+
+    function loadNotes() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function persistNotes() {
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(notes));
+      } catch (err) {
+        /* storage full/unavailable — editor still works for this session */
+      }
+    }
+
+    function uid() {
+      return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    let notes = loadNotes();
+    let activeId = localStorage.getItem(ACTIVE_KEY) || null;
+    let saveTimer = null;
+    let cm = null; // CodeMirror instance, created lazily
+    let vimLibsPromise = null;
+
+    function findNote(id) {
+      return notes.find((n) => n.id === id) || null;
+    }
+
+    function vimActive() {
+      return !!cm && !vimHost.hidden;
+    }
+
+    function currentEditorText() {
+      return vimActive() ? cm.getValue() : contentArea.value;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function relativeTime(ts) {
+      const diff = Date.now() - ts;
+      const min = 60000, hr = 3600000, day = 86400000;
+      if (diff < 45000) return "just now";
+      if (diff < hr) return Math.max(1, Math.round(diff / min)) + "m ago";
+      if (diff < day) return Math.round(diff / hr) + "h ago";
+      if (diff < day * 7) return Math.round(diff / day) + "d ago";
+      return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    }
+
+    function snippet(note) {
+      const text = (note.content || "").trim().replace(/\s+/g, " ");
+      return text ? text.slice(0, 70) : "No additional text";
+    }
+
+    function setStatus(state, text) {
+      statusText.textContent = text;
+      statusWrap.classList.toggle("saving", state === "saving");
+    }
+
+    function updateMeta() {
+      const text = currentEditorText();
+      const trimmed = text.trim();
+      const words = trimmed ? trimmed.split(/\s+/).length : 0;
+      const chars = text.length;
+      metaEl.textContent = `${words} word${words === 1 ? "" : "s"} \u00b7 ${chars} character${chars === 1 ? "" : "s"}`;
+    }
+
+    function renderList() {
+      const query = (searchInput.value || "").trim().toLowerCase();
+      const sorted = notes.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+      const filtered = sorted.filter((n) => {
+        if (!query) return true;
+        return (n.title || "").toLowerCase().includes(query) || (n.content || "").toLowerCase().includes(query);
+      });
+
+      listEl.innerHTML = "";
+      emptyHint.hidden = !(notes.length > 0 && filtered.length === 0);
+
+      filtered.forEach((note) => {
+        const li = document.createElement("li");
+        li.className = "note-item" + (note.id === activeId ? " active" : "");
+        li.dataset.id = note.id;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "note-item-btn";
+        btn.innerHTML =
+          `<span class="note-item-title">${escapeHtml(note.title || "Untitled note")}</span>` +
+          `<span class="note-item-snippet">${escapeHtml(snippet(note))}</span>` +
+          `<span class="note-item-time">${relativeTime(note.updatedAt)}</span>`;
+        btn.addEventListener("click", () => {
+          if (note.id === activeId) return;
+          saveActive();
+          activeId = note.id;
+          localStorage.setItem(ACTIVE_KEY, activeId);
+          loadIntoEditor(note);
+          renderList();
+        });
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "note-item-del";
+        del.setAttribute("aria-label", "Delete note");
+        del.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+        del.addEventListener("click", (e) => {
+          e.stopPropagation();
+          confirmDelete(note.id, del);
+        });
+
+        li.appendChild(btn);
+        li.appendChild(del);
+        listEl.appendChild(li);
+      });
+    }
+
+    let pendingDeleteId = null;
+    let pendingDeleteTimer = null;
+    function confirmDelete(id, delBtnEl) {
+      if (pendingDeleteId === id) {
+        clearTimeout(pendingDeleteTimer);
+        pendingDeleteId = null;
+        deleteNote(id);
+        showToast("Note deleted");
+        return;
+      }
+      pendingDeleteId = id;
+      delBtnEl.classList.add("confirm");
+      clearTimeout(pendingDeleteTimer);
+      pendingDeleteTimer = setTimeout(() => {
+        pendingDeleteId = null;
+        delBtnEl.classList.remove("confirm");
+      }, 2200);
+      showToast("Click again to delete");
+    }
+
+    function loadIntoEditor(note) {
+      titleInput.value = note.title || "";
+      contentArea.value = note.content || "";
+      if (cm) cm.setValue(note.content || "");
+      updateMeta();
+      setStatus("saved", "All changes saved");
+    }
+
+    function scheduleSave() {
+      setStatus("saving", "Saving\u2026");
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveActive, 400);
+      updateMeta();
+    }
+
+    function saveActive() {
+      clearTimeout(saveTimer);
+      const note = findNote(activeId);
+      if (!note) return;
+      note.title = titleInput.value;
+      note.content = currentEditorText();
+      note.updatedAt = Date.now();
+      persistNotes();
+      renderList();
+      setStatus("saved", "All changes saved");
+    }
+
+    function createNote(focus) {
+      saveActive();
+      const note = { id: uid(), title: "", content: "", updatedAt: Date.now() };
+      notes.unshift(note);
+      persistNotes();
+      activeId = note.id;
+      localStorage.setItem(ACTIVE_KEY, activeId);
+      searchInput.value = "";
+      renderList();
+      loadIntoEditor(note);
+      if (focus) titleInput.focus();
+    }
+
+    function deleteNote(id) {
+      const idx = notes.findIndex((n) => n.id === id);
+      if (idx === -1) return;
+      notes.splice(idx, 1);
+      persistNotes();
+      if (activeId === id) {
+        const remaining = notes.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+        activeId = remaining.length ? remaining[0].id : null;
+        localStorage.setItem(ACTIVE_KEY, activeId || "");
+      }
+      if (activeId) {
+        loadIntoEditor(findNote(activeId));
+        renderList();
+      } else {
+        createNote(false);
+      }
+    }
+
+    /* ---- Vim mode (lazy-loaded from cdnjs) ---- */
+    function loadVimLibs() {
+      if (window.CodeMirror && window.CodeMirror.keyMap && window.CodeMirror.keyMap.vim) {
+        return Promise.resolve();
+      }
+      if (vimLibsPromise) return vimLibsPromise;
+
+      function loadCss(href) {
+        return new Promise((resolve) => {
+          if (document.querySelector(`link[href="${href}"]`)) return resolve();
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = href;
+          link.onload = () => resolve();
+          link.onerror = () => resolve();
+          document.head.appendChild(link);
+        });
+      }
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Failed to load " + src));
+          document.head.appendChild(script);
+        });
+      }
+
+      const base = "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/";
+      vimLibsPromise = loadCss(base + "codemirror.min.css")
+        .then(() => loadScript(base + "codemirror.min.js"))
+        .then(() => loadScript(base + "keymap/vim.min.js"));
+      return vimLibsPromise;
+    }
+
+    function enableVim() {
+      setStatus("saving", "Loading Vim mode\u2026");
+      loadVimLibs()
+        .then(() => {
+          if (!cm) {
+            cm = window.CodeMirror(vimHost, {
+              value: contentArea.value,
+              lineWrapping: true,
+              keyMap: "vim",
+              viewportMargin: Infinity,
+              tabSize: 2,
+            });
+            cm.on("change", () => {
+              contentArea.value = cm.getValue();
+              scheduleSave();
+            });
+          } else {
+            cm.setOption("keyMap", "vim");
+          }
+          contentArea.hidden = true;
+          vimHost.hidden = false;
+          cm.refresh();
+          cm.focus();
+          setStatus("saved", "All changes saved");
+          showToast("Vim mode on \u2014 Esc for normal mode");
+        })
+        .catch(() => {
+          vimToggle.checked = false;
+          setStatus("saved", "All changes saved");
+          showToast("Couldn't load Vim mode \u2014 check your connection");
+        });
+    }
+
+    function disableVim() {
+      if (cm) contentArea.value = cm.getValue();
+      vimHost.hidden = true;
+      contentArea.hidden = false;
+      updateMeta();
+      contentArea.focus();
+    }
+
+    vimToggle.addEventListener("change", () => {
+      localStorage.setItem(VIM_KEY, vimToggle.checked ? "1" : "0");
+      if (vimToggle.checked) enableVim();
+      else disableVim();
+    });
+
+    /* ---- wiring ---- */
+    titleInput.addEventListener("input", scheduleSave);
+    contentArea.addEventListener("input", scheduleSave);
+    searchInput.addEventListener("input", renderList);
+    newBtn.addEventListener("click", () => createNote(true));
+
+    deleteBtn.addEventListener("click", () => {
+      if (!activeId) return;
+      const note = findNote(activeId);
+      const label = note && note.title ? `"${note.title}"` : "this note";
+      if (window.confirm(`Delete ${label}? This can't be undone.`)) {
+        deleteNote(activeId);
+        showToast("Note deleted");
+      }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const note = findNote(activeId);
+      if (!note) return;
+      const safeName =
+        (note.title || "untitled-note")
+          .trim()
+          .replace(/[^a-z0-9\-_ ]/gi, "")
+          .replace(/\s+/g, "-")
+          .toLowerCase() || "untitled-note";
+      const blob = new Blob([note.content || ""], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = safeName + ".txt";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast("Note downloaded");
+    });
+
+    window.addEventListener("beforeunload", saveActive);
+    window.addEventListener("hashchange", saveActive);
+
+    document.addEventListener("keydown", (e) => {
+      const notesView = document.querySelector('[data-view="notes"]');
+      if (!notesView || !notesView.classList.contains("active")) return;
+      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        createNote(true);
+      }
+    });
+
+    /* ---- init ---- */
+    (function init() {
+      if (notes.length === 0) {
+        const welcome = {
+          id: uid(),
+          title: "Welcome",
+          content:
+            "This is your first note.\n\nEverything you type here autosaves automatically to this browser \u2014 no button to press, no server involved.\n\nUse + in the sidebar for a new note, the search box to find one, and the download icon to export a note as a .txt file. Flip the Vim switch above the editor if you'd rather move around with hjkl.",
+          updatedAt: Date.now(),
+        };
+        notes.push(welcome);
+        activeId = welcome.id;
+        persistNotes();
+        localStorage.setItem(ACTIVE_KEY, activeId);
+      } else if (!activeId || !findNote(activeId)) {
+        const newest = notes.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0];
+        activeId = newest.id;
+        localStorage.setItem(ACTIVE_KEY, activeId);
+      }
+
+      renderList();
+      loadIntoEditor(findNote(activeId));
+
+      if (localStorage.getItem(VIM_KEY) === "1") {
+        vimToggle.checked = true;
+        enableVim();
+      }
+    })();
+  })();
 })();

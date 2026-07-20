@@ -87,6 +87,15 @@
           <span class="tool-card-cta">Open tool <span aria-hidden="true">&rarr;</span></span>
         </button>
 
+        <button class="tool-card" type="button" data-target="notes">
+          <span class="tool-card-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9Z"></path><path d="M14 3v6h6"></path><line x1="8.5" y1="13" x2="15.5" y2="13"></line><line x1="8.5" y1="16.5" x2="13.5" y2="16.5"></line></svg>
+          </span>
+          <span class="tool-card-title">Notes</span>
+          <span class="tool-card-desc">Quick scratch notes that autosave to this browser. Optional vim controls</span>
+          <span class="tool-card-cta">Open tool <span aria-hidden="true">&rarr;</span></span>
+        </button>
+
       </div>
       <p class="more-tools">More tools soon.</p>
     </div>
@@ -247,6 +256,82 @@
           </div>
         </div>
         <p class="hint" id="color-hint">Formats stay in sync automatically. Invalid values are ignored until they're valid again.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ NOTES TOOL VIEW ============ -->
+  <section id="view-notes" class="view tool-view" data-view="notes">
+    <button class="back-btn" type="button" data-back>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to tools
+    </button>
+
+    <article class="tool-card-full tool-card-full--wide notes-card">
+      <div class="tool-titlebar">
+        <span class="dots" aria-hidden="true"><span class="dot dot--r"></span><span class="dot dot--y"></span><span class="dot dot--g"></span></span>
+        <span class="tool-path">~/tools/notes</span>
+      </div>
+      <div class="tool-body notes-body">
+
+        <div class="notes-head">
+          <div>
+            <h2>Notes</h2>
+            <p class="tool-desc">Plain text notepad. Everything autosaves as you type.</p>
+          </div>
+          <label class="vim-toggle" for="vim-toggle-input" title="Toggle Vim keybindings in the editor">
+            <input type="checkbox" id="vim-toggle-input">
+            <span class="vim-toggle-track" aria-hidden="true"><span class="vim-toggle-thumb"></span></span>
+            <span class="vim-toggle-label">Vim-controls</span>
+          </label>
+        </div>
+
+        <div class="notes-layout">
+
+          <aside class="notes-sidebar">
+            <div class="notes-sidebar-top">
+              <div class="notes-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="notes-search" placeholder="Search notes" autocomplete="off" spellcheck="false">
+              </div>
+              <button class="icon-btn notes-new-btn" id="notes-new-btn" type="button" aria-label="New note" title="New note (Ctrl/Cmd+Alt+N)">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+            <ul class="notes-list" id="notes-list"></ul>
+            <p class="notes-empty-hint" id="notes-empty-hint" hidden>No notes match your search.</p>
+          </aside>
+
+          <div class="notes-editor">
+            <div class="notes-editor-top">
+              <input type="text" id="note-title" class="note-title-input" placeholder="Untitled note" autocomplete="off" spellcheck="false" maxlength="120">
+              <div class="notes-editor-actions">
+                <button class="icon-btn" id="notes-download-btn" type="button" aria-label="Download note as .txt" title="Download as .txt">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </button>
+                <button class="icon-btn" id="notes-delete-btn" type="button" aria-label="Delete note" title="Delete note">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="note-editor-wrap">
+              <textarea id="note-content" class="note-textarea" placeholder="Try typing. Vim controls on top right." spellcheck="false"></textarea>
+              <div id="note-vim-host" class="note-vim-host" hidden></div>
+            </div>
+
+            <div class="notes-footer">
+              <span id="notes-status" class="notes-status">
+                <span class="notes-status-dot" aria-hidden="true"></span>
+                <span id="notes-status-text">All changes saved</span>
+              </span>
+              <span id="notes-meta" class="notes-meta">0 words &middot; 0 characters</span>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="hint">Notes live only in this browser, nothing is sent anywhere. Clearing site data or switching browsers will lose them, so export anything important with the download button.</p>
       </div>
     </article>
   </section>
